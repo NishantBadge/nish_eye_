@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0b0b14">
+<title>NishWatch</title>
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b0b14;
+    --card: #12122a;
+    --input-bg: #1a1a34;
+    --border: rgba(255,255,255,0.05);
+    --accent: #00d4aa;
+    --accent-dim: rgba(0,212,170,0.12);
+    --red: #e74c3c;
+    --red-dim: rgba(231,76,60,0.12);
+    --yellow: #f1c40f;
+    --yellow-dim: rgba(241,196,15,0.12);
+    --green: #2ecc71;
+    --green-dim: rgba(46,204,113,0.12);
+    --blue: #3366ff;
+    --t1: #e6e6f0;
+    --t2: #6e6e90;
+    --font: 'DM Sans', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--bg); color: var(--t1); font-family: var(--font); min-height: 100vh; min-height: 100dvh; }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.06); border-radius: 2px; }
+
+  /* ---- HEADER ---- */
+  .header {
+    background: var(--card); border-bottom: 1px solid var(--border);
+    padding: 12px 16px; position: sticky; top: 0; z-index: 100;
+  }
+  .header-inner {
+    max-width: 860px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 8px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon {
+    width: 36px; height: 36px; border-radius: 9px;
+    background: linear-gradient(135deg, var(--accent), #0088ff);
+    display: flex; align-items: center; justify-content: center; font-size: 17px;
+  }
+  .logo h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
+  .logo .status { font-size: 10px; font-weight: 600; color: var(--accent); }
+
+  .tabs { display: flex; gap: 2px; background: var(--input-bg); border-radius: 8px; padding: 2px; }
+  .tab {
+    padding: 8px 18px; border-radius: 6px; border: none;
+    font-size: 13px; font-weight: 600; cursor: pointer;
+    font-family: var(--font); background: transparent; color: var(--t2); transition: all .15s;
+  }
+  .tab.active { background: var(--accent); color: var(--bg); }
+
+  /* ---- LAYOUT ---- */
+  .container { max-width: 860px; margin: 0 auto; padding: 16px 12px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 22px; margin-bottom: 14px;
+  }
+  .card-title {
+    font-size: 15px; font-weight: 700; margin-bottom: 18px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .card-title .dot { color: var(--accent); }
+  .hidden { display: none !important; }
+
+  /* ---- FORM ---- */
+  label {
+    font-size: 11px; font-weight: 700; color: var(--t2);
+    display: block; text-transform: uppercase; letter-spacing: 0.05em;
+    margin-bottom: 5px;
+  }
+  .input, select, textarea {
+    width: 100%; padding: 11px 13px; background: var(--input-bg);
+    border: 1px solid rgba(255,255,255,0.07); border-radius: 8px;
+    color: var(--t1); font-size: 14px; font-family: var(--font);
+    outline: none; transition: border-color .2s;
+  }
+  .input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  select {
+    cursor: pointer; -webkit-appearance: none; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236e6e90' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+  }
+  select option { background: var(--input-bg); color: var(--t1); }
+  textarea { resize: vertical; min-height: 80px; }
+
+  .row { display: grid; gap: 12px; margin-bottom: 14px; }
+  .row-2 { grid-template-columns: 1fr 1fr; }
+  .row-3a { grid-template-columns: 1fr 1fr auto; align-items: end; }
+  .field { margin-bottom: 14px; }
+
+  /* ---- CHIPS ---- */
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    padding: 7px 12px; border-radius: 7px; font-size: 12px; font-weight: 600;
+    cursor: pointer; font-family: var(--font); border: 1px solid var(--border);
+    background: transparent; color: var(--t2); transition: all .15s;
+  }
+  .chip:hover { border-color: rgba(255,255,255,0.15); }
+  .chip.sel-red { background: var(--red-dim); color: var(--red); border-color: var(--red); box-shadow: inset 0 0 0 1px var(--red); }
+  .chip.sel-yellow { background: var(--yellow-dim); color: var(--yellow); border-color: var(--yellow); box-shadow: inset 0 0 0 1px var(--yellow); }
+  .chip.sel-green { background: var(--green-dim); color: var(--green); border-color: var(--green); box-shadow: inset 0 0 0 1px var(--green); }
+
+  /* ---- BUTTONS ---- */
+  .btn {
+    border: none; border-radius: 8px; padding: 12px 20px;
+    font-weight: 700; font-size: 14px; cursor: pointer;
+    font-family: var(--font); transition: all .15s;
+  }
+  .btn:hover:not(:disabled) { filter: brightness(1.1); }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .btn-primary { background: var(--accent); color: var(--bg); }
+  .btn-blue { background: var(--blue); color: #fff; }
+  .btn-red { background: var(--red); color: #fff; }
+  .btn-full { width: 100%; }
+  .btn-sm { padding: 7px 14px; font-size: 12px; }
+  .btn-link { background: none; border: none; color: var(--accent); font-weight: 600; font-size: 11px; cursor: pointer; font-family: var(--font); padding: 0; }
+
+  /* ---- UPLOAD ---- */
+  .upload-area {
+    border: 2px dashed rgba(255,255,255,0.08); border-radius: 10px;
+    padding: 24px; text-align: center; cursor: pointer; transition: all .2s;
+  }
+  .upload-area.has-image { border-color: var(--accent); padding: 10px; background: rgba(0,212,170,0.03); }
+  .upload-area .icon { font-size: 26px; margin-bottom: 4px; }
+  .upload-area p { font-size: 12px; color: var(--t2); }
+  .upload-area .sub { font-size: 10px; color: rgba(255,255,255,0.15); margin-top: 2px; }
+  .upload-preview { display: flex; align-items: center; gap: 12px; }
+  .upload-preview img { height: 64px; border-radius: 7px; border: 1px solid rgba(255,255,255,0.08); }
+  .upload-preview .info { text-align: left; }
+  .upload-preview .ok { font-size: 12px; font-weight: 600; color: var(--accent); }
+  .upload-preview .change { font-size: 10px; color: var(--t2); margin-top: 2px; }
+  #fileInput { display: none; }
+
+  /* ---- TIMESTAMP ---- */
+  .ts-bar {
+    padding: 10px 14px; background: var(--input-bg); border-radius: 8px;
+    font-size: 12px; display: flex; align-items: center; gap: 6px;
+  }
+  .ts-bar .val { font-family: var(--mono); color: var(--accent); }
+
+  /* ---- RECORDS ---- */
+  .filter-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .filter-bar h3 { font-size: 14px; font-weight: 700; }
+  .filter-btns { display: flex; gap: 6px; }
+
+  .summary-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .summary-chip {
+    background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+    padding: 4px 10px; font-size: 11px; font-weight: 600;
+  }
+  .summary-chip .count { color: var(--accent); margin-left: 6px; font-family: var(--mono); }
+
+  .record {
+    background: var(--card); border: 1px solid var(--border); border-radius: 11px;
+    padding: 14px; display: flex; gap: 12px; align-items: flex-start; margin-bottom: 6px;
+  }
+  .record-thumb {
+    flex-shrink: 0; width: 48px; height: 48px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center; font-size: 18px; text-decoration: none;
+  }
+  .record-thumb.has-img { background: rgba(0,212,170,0.08); border: 1px solid rgba(0,212,170,0.15); }
+  .record-thumb.no-img { background: var(--input-bg); color: rgba(255,255,255,0.1); }
+  .record-body { flex: 1; min-width: 0; }
+  .record-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+  .badge { padding: 2px 8px; border-radius: 5px; font-size: 10px; font-weight: 700; }
+  .badge-red { background: var(--red-dim); color: var(--red); }
+  .badge-yellow { background: var(--yellow-dim); color: var(--yellow); }
+  .badge-green { background: var(--green-dim); color: var(--green); }
+  .record-store { font-size: 11px; color: var(--t2); font-weight: 500; }
+  .record-text { font-size: 13px; line-height: 1.5; }
+  .record-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 5px; }
+  .record-meta span { font-size: 10px; color: var(--t2); }
+  .record-meta .ts { font-family: var(--mono); }
+  .record-meta a { font-size: 10px; color: var(--blue); font-weight: 600; text-decoration: none; }
+
+  .empty { text-align: center; padding: 40px 20px; color: var(--t2); }
+  .empty .e-icon { font-size: 36px; margin-bottom: 8px; }
+  .empty .e-title { font-size: 14px; font-weight: 600; }
+  .empty .e-sub { font-size: 12px; margin-top: 4px; }
+  .count-label { font-size: 11px; color: var(--t2); font-weight: 600; margin-bottom: 8px; }
+
+  /* ---- SUCCESS ANIMATION ---- */
+  .success-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
+    animation: fadeIn .2s ease;
+  }
+  .success-box {
+    background: var(--card); border: 1px solid var(--accent); border-radius: 20px;
+    padding: 36px 48px; text-align: center; animation: scaleIn .3s ease;
+  }
+  .success-box .check { font-size: 48px; margin-bottom: 12px; }
+  .success-box .msg { font-size: 16px; font-weight: 700; color: var(--accent); }
+  .success-box .smsg { font-size: 12px; color: var(--t2); margin-top: 6px; }
+
+  /* ---- TOAST ---- */
+  .toast {
+    position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+    z-index: 10000; padding: 11px 24px; border-radius: 10px;
+    font-weight: 600; font-size: 14px; max-width: 90vw; text-align: center;
+    box-shadow: 0 6px 28px rgba(0,0,0,0.5); animation: pop .25s ease;
+  }
+  .toast.success { background: var(--accent); color: var(--bg); }
+  .toast.error { background: var(--red); color: #fff; }
+
+  @keyframes pop { from { opacity: 0; transform: translateX(-50%) scale(.95); } to { opacity: 1; transform: translateX(-50%) scale(1); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes scaleIn { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: scale(1); } }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+  /* ---- INSTALL BANNER ---- */
+  .install-banner {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 9998;
+    background: linear-gradient(135deg, #12122a, #1a1a3a);
+    border-top: 1px solid rgba(0,212,170,0.2);
+    padding: 16px 20px; display: flex; align-items: center;
+    justify-content: space-between; gap: 12px;
+    animation: slideUp .3s ease;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+  }
+  .install-banner .ib-text { flex: 1; }
+  .install-banner .ib-title { font-size: 14px; font-weight: 700; color: var(--accent); }
+  .install-banner .ib-sub { font-size: 11px; color: var(--t2); margin-top: 2px; }
+  .install-banner .ib-btn {
+    background: var(--accent); color: var(--bg); border: none; border-radius: 8px;
+    padding: 10px 20px; font-weight: 700; font-size: 13px; cursor: pointer;
+    font-family: var(--font); white-space: nowrap;
+  }
+  .install-banner .ib-close {
+    background: none; border: none; color: var(--t2); font-size: 18px;
+    cursor: pointer; padding: 4px; line-height: 1;
+  }
+
+  @media (max-width: 600px) {
+    .row-2, .row-3a { grid-template-columns: 1fr; }
+    .filter-bar { flex-direction: column; align-items: stretch; }
+    .filter-btns { justify-content: flex-end; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div id="toast" class="toast hidden"></div>
+
+<!-- SUCCESS OVERLAY -->
+<div id="successOverlay" class="success-overlay hidden" onclick="this.classList.add('hidden')">
+  <div class="success-box">
+    <div class="check">✅</div>
+    <div class="msg">Observation Logged!</div>
+    <div class="smsg">Saved to Google Sheets & Drive</div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">👁️</div>
+      <div>
+        <h1>NishWatch</h1>
+        <p class="status">● Live</p>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" id="tabForm" onclick="switchView('form')">＋ Log</button>
+      <button class="tab" id="tabLog" onclick="switchView('log')">📋 Records</button>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ====== FORM VIEW ====== -->
+  <div id="viewForm">
+    <div class="card">
+      <div class="card-title"><span class="dot">●</span> Log Observation</div>
+
+      <div class="field">
+        <label>Store *</label>
+        <select id="storeSelect"><option value="">Select store...</option></select>
+      </div>
+
+      <div class="field">
+        <label>Observation Type *</label>
+        <div class="chips" id="typeChips"></div>
+      </div>
+
+      <div class="field">
+        <label>Remarks *</label>
+        <textarea id="remarks" placeholder="Describe what you observed on camera... e.g. Staff at counter chatting, 2 customers waiting at billing"></textarea>
+      </div>
+
+      <div class="row row-2">
+        <div>
+          <label>Your Name</label>
+          <input class="input" id="loggedBy" placeholder="Camera operator name">
+        </div>
+        <div>
+          <label>Timestamp (auto)</label>
+          <div class="ts-bar"><span>🕐</span><span class="val" id="timestamp"></span></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Screenshot</label>
+        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+          <div id="uploadContent">
+            <div class="icon">📷</div>
+            <p>Tap to upload screenshot from camera</p>
+            <p class="sub">JPG, PNG — max 4 MB</p>
+          </div>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" capture="environment" onchange="handleImage(event)">
+      </div>
+
+      <button class="btn btn-primary btn-full" id="submitBtn" onclick="handleSubmit()" style="font-size:15px;padding:14px">
+        ✓ &nbsp;Submit Observation
+      </button>
+    </div>
+  </div>
+
+  <!-- ====== LOG VIEW ====== -->
+  <div id="viewLog" class="hidden">
+    <div class="card" style="padding:18px">
+      <div class="filter-bar">
+        <h3>🔍 Filter & Export</h3>
+        <div class="filter-btns">
+          <button class="btn btn-blue btn-sm" id="refreshBtn" onclick="fetchRecords()">🔄 Refresh</button>
+          <button class="btn btn-red btn-sm" id="pdfBtn" onclick="downloadPDF()" disabled>📄 PDF (0)</button>
+        </div>
+      </div>
+      <div class="row row-2" style="margin-bottom:10px">
+        <div><label>From</label><input class="input" type="date" id="filterFrom"></div>
+        <div><label>To</label><input class="input" type="date" id="filterTo"></div>
+      </div>
+      <div class="row row-3a">
+        <div>
+          <label>Store</label>
+          <select id="filterStore"><option value="">All Stores</option></select>
+        </div>
+        <div>
+          <label>Type</label>
+          <select id="filterType"><option value="">All Types</option></select>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="fetchRecords()">Apply</button>
+      </div>
+      <div id="clearFilters" class="hidden" style="margin-top:8px">
+        <button class="btn-link" onclick="clearFilters()">✕ Clear Filters</button>
+      </div>
+    </div>
+
+    <div id="summaryChips" class="summary-chips"></div>
+    <div id="recordsCount" class="count-label hidden"></div>
+    <div id="recordsList"></div>
+  </div>
+
+</div>
+
+<script>
+// ============================================
+//  ⚙️ CONFIGURATION — SET YOUR URL HERE
+// ============================================
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbziijdxOVRJWVfKfQejWPcr_h7BeU6rViS_Ixu_rHv2wn--jaJaJ48UyzfglN4E1Wjo/exec";
+// Example: const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx.../exec";
+// ============================================
+
+const STORES = [
+  "INL8 - Borivali","INI5 - Shimla","IN1Z - Patiala","IN9V - Dehradun",
+  "INAJ - Goa","INS2 - Vesu","INK2 - Jammu","INV6 - Mussoorie",
+  "INH7 - Indore","ING9 - Jalandhar","INBK - Haldwani","INJ7 - Surat Adajan",
+  "INZ2 - Lulu Mall Hyd","INI8 - Bhopal","INAH - Bathinda"
+];
+
+const TYPES = [
+  "Staff Not Attending Customer","Customer Ignored / Not Greeted",
+  "Staff Chatting in Group","Staff on Mobile Phone",
+  "Uniform Not Worn Properly","Store Not Clean / Messy Display",
+  "Products Not Arranged / Shelf Empty","Staff Sitting / Not at Position",
+  "Late Store Opening","Cash Counter Unmanned",
+  "Trial Room Unattended","Staff Eating on Floor",
+  "Customer Waiting Too Long","Suspicious Customer Behavior",
+  "Safety / Maintenance Issue","Good Practice / Appreciation","Other"
+];
+
+let selectedType = "";
+let imageData = null;
+let records = [];
+
+// ============================================
+// INIT
+// ============================================
+function init() {
+  const sel1 = document.getElementById("storeSelect");
+  const sel2 = document.getElementById("filterStore");
+  STORES.forEach(s => {
+    sel1.innerHTML += `<option value="${s}">${s}</option>`;
+    sel2.innerHTML += `<option value="${s}">${s}</option>`;
+  });
+
+  const sel3 = document.getElementById("filterType");
+  TYPES.forEach(t => { sel3.innerHTML += `<option value="${t}">${t}</option>`; });
+
+  renderChips();
+
+  const savedName = localStorage.getItem("sm-user");
+  if (savedName) document.getElementById("loggedBy").value = savedName;
+
+  updateTimestamp();
+  setInterval(updateTimestamp, 30000);
+}
+
+function renderChips() {
+  const c = document.getElementById("typeChips");
+  c.innerHTML = "";
+  TYPES.forEach(t => {
+    const chip = document.createElement("button");
+    chip.className = "chip" + (selectedType === t ? " " + getChipClass(t) : "");
+    chip.textContent = t;
+    chip.onclick = () => { selectedType = (selectedType === t) ? "" : t; renderChips(); };
+    c.appendChild(chip);
+  });
+}
+
+function getChipClass(t) {
+  if (t.includes("Good") || t.includes("Appreciation")) return "sel-green";
+  if (t.includes("Not") || t.includes("Ignored") || t.includes("Unmanned") || t.includes("Waiting")) return "sel-red";
+  return "sel-yellow";
+}
+
+function getBadgeClass(t) {
+  if (!t) return "badge-yellow";
+  if (t.includes("Good") || t.includes("Appreciation")) return "badge-green";
+  if (t.includes("Not") || t.includes("Ignored") || t.includes("Unmanned") || t.includes("Waiting")) return "badge-red";
+  return "badge-yellow";
+}
+
+function updateTimestamp() {
+  const el = document.getElementById("timestamp");
+  if (el) el.textContent = new Date().toLocaleString("en-IN", {
+    day: "2-digit", month: "short", year: "numeric",
+    hour: "2-digit", minute: "2-digit", hour12: true
+  });
+}
+
+// ============================================
+// VIEW SWITCH
+// ============================================
+function switchView(v) {
+  document.getElementById("viewForm").classList.toggle("hidden", v !== "form");
+  document.getElementById("viewLog").classList.toggle("hidden", v !== "log");
+  document.getElementById("tabForm").classList.toggle("active", v === "form");
+  document.getElementById("tabLog").classList.toggle("active", v === "log");
+  if (v === "log") fetchRecords();
+}
+
+// ============================================
+// IMAGE
+// ============================================
+function handleImage(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  if (file.size > 4 * 1024 * 1024) { showToast("Max 4 MB image", "error"); return; }
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    imageData = ev.target.result;
+    const area = document.getElementById("uploadArea");
+    area.classList.add("has-image");
+    document.getElementById("uploadContent").innerHTML = `
+      <div class="upload-preview">
+        <img src="${imageData}">
+        <div class="info"><p class="ok">Attached ✓</p><p class="change">Tap to change</p></div>
+      </div>`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetUpload() {
+  imageData = null;
+  document.getElementById("uploadArea").classList.remove("has-image");
+  document.getElementById("uploadContent").innerHTML = `
+    <div class="icon">📷</div>
+    <p>Tap to upload screenshot from camera</p>
+    <p class="sub">JPG, PNG — max 4 MB</p>`;
+  document.getElementById("fileInput").value = "";
+}
+
+// ============================================
+// SUBMIT
+// ============================================
+async function handleSubmit() {
+  const store = document.getElementById("storeSelect").value;
+  const remarks = document.getElementById("remarks").value.trim();
+  const loggedBy = document.getElementById("loggedBy").value.trim();
+
+  if (!store) { showToast("Select a store", "error"); return; }
+  if (!selectedType) { showToast("Select observation type", "error"); return; }
+  if (!remarks) { showToast("Add remarks", "error"); return; }
+
+  if (SCRIPT_URL.includes("YOUR_APPS_SCRIPT")) {
+    showToast("Set SCRIPT_URL in index.html first", "error"); return;
+  }
+
+  localStorage.setItem("sm-user", loggedBy);
+
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.textContent = "⏳ Saving...";
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST", mode: "no-cors",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({
+        action: "submit",
+        store, incidentType: selectedType,
+        remarks, loggedBy: loggedBy || "Camera Operator",
+        image: imageData || ""
+      })
+    });
+
+    // Show success overlay
+    document.getElementById("successOverlay").classList.remove("hidden");
+    setTimeout(() => document.getElementById("successOverlay").classList.add("hidden"), 2000);
+
+    // Reset form
+    document.getElementById("storeSelect").value = "";
+    selectedType = ""; renderChips();
+    document.getElementById("remarks").value = "";
+    resetUpload();
+  } catch (err) {
+    showToast("Failed: " + err.message, "error");
+  }
+
+  btn.disabled = false;
+  btn.textContent = "✓  Submit Observation";
+}
+
+// ============================================
+// FETCH RECORDS
+// ============================================
+async function fetchRecords() {
+  if (SCRIPT_URL.includes("YOUR_APPS_SCRIPT")) {
+    showToast("Set SCRIPT_URL in index.html first", "error"); return;
+  }
+
+  const btn = document.getElementById("refreshBtn");
+  btn.disabled = true; btn.textContent = "...";
+
+  const fs = document.getElementById("filterStore").value;
+  const ft = document.getElementById("filterType").value;
+  const ff = document.getElementById("filterFrom").value;
+  const fto = document.getElementById("filterTo").value;
+
+  document.getElementById("clearFilters").classList.toggle("hidden", !(fs || ft || ff || fto));
+
+  try {
+    let url = SCRIPT_URL + "?action=getData";
+    if (fs) url += "&store=" + encodeURIComponent(fs);
+    if (ft) url += "&type=" + encodeURIComponent(ft);
+    if (ff) url += "&fromDate=" + ff;
+    if (fto) url += "&toDate=" + fto;
+
+    const res = await fetch(url);
+    const json = await res.json();
+    if (json.success) { records = json.data || []; renderRecords(); }
+    else showToast(json.error || "Failed", "error");
+  } catch (err) {
+    showToast("Error: " + err.message, "error");
+  }
+
+  btn.disabled = false; btn.textContent = "🔄 Refresh";
+}
+
+function renderRecords() {
+  const pdfBtn = document.getElementById("pdfBtn");
+  pdfBtn.disabled = records.length === 0;
+  pdfBtn.textContent = `📄 PDF (${records.length})`;
+
+  // Summary
+  const byStore = {};
+  records.forEach(r => { byStore[r.store] = (byStore[r.store] || 0) + 1; });
+  document.getElementById("summaryChips").innerHTML = Object.entries(byStore)
+    .sort((a, b) => b[1] - a[1])
+    .map(([s, c]) => `<div class="summary-chip"><span style="color:var(--t2)">${s}</span><span class="count">${c}</span></div>`).join("");
+
+  const countEl = document.getElementById("recordsCount");
+  const listEl = document.getElementById("recordsList");
+
+  if (!records.length) {
+    countEl.classList.add("hidden");
+    listEl.innerHTML = `<div class="empty"><div class="e-icon">📭</div><div class="e-title">No records found</div><div class="e-sub">Log an observation or adjust filters</div></div>`;
+    return;
+  }
+
+  countEl.classList.remove("hidden");
+  countEl.textContent = `${records.length} observation${records.length > 1 ? "s" : ""}`;
+
+  listEl.innerHTML = records.map(r => {
+    const bc = getBadgeClass(r.incidentType);
+    const hasImg = r.imageUrl && r.imageUrl.startsWith("http");
+    return `<div class="record">
+      <${hasImg ? `a href="${r.imageUrl}" target="_blank"` : 'div'} class="record-thumb ${hasImg ? 'has-img' : 'no-img'}">
+        ${hasImg ? '🖼' : '📷'}
+      </${hasImg ? 'a' : 'div'}>
+      <div class="record-body">
+        <div class="record-tags">
+          <span class="badge ${bc}">${r.incidentType}</span>
+          <span class="record-store">${r.store}</span>
+        </div>
+        <div class="record-text">${r.remarks}</div>
+        <div class="record-meta">
+          <span class="ts">${r.date} · ${r.time}</span>
+          ${r.loggedBy ? `<span>— ${r.loggedBy}</span>` : ''}
+          ${hasImg ? `<a href="${r.imageUrl}" target="_blank">Screenshot ↗</a>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function clearFilters() {
+  document.getElementById("filterFrom").value = "";
+  document.getElementById("filterTo").value = "";
+  document.getElementById("filterStore").value = "";
+  document.getElementById("filterType").value = "";
+  document.getElementById("clearFilters").classList.add("hidden");
+  fetchRecords();
+}
+
+// ============================================
+// PDF
+// ============================================
+function driveImgUrl(url) {
+  if (!url || !url.startsWith("http")) return "";
+  var fileId = "";
+  // Extract file ID from drive.google.com/file/d/ID/...
+  var match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (match) fileId = match[1];
+  // Extract from drive.google.com/open?id=ID
+  if (!fileId) { var match2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/); if (match2) fileId = match2[1]; }
+  if (fileId) return "https://lh3.googleusercontent.com/d/" + fileId + "=w200";
+  return url;
+}
+
+function downloadPDF() {
+  if (!records.length) return;
+  const ff = document.getElementById("filterFrom").value;
+  const fto = document.getElementById("filterTo").value;
+
+  // Analytics
+  const byStore = {}, byType = {}, byHour = {};
+  let criticalCount = 0;
+  records.forEach(r => {
+    byStore[r.store] = (byStore[r.store] || 0) + 1;
+    byType[r.incidentType] = (byType[r.incidentType] || 0) + 1;
+    // Extract hour
+    const hMatch = r.time?.match(/(\d+):/);
+    if (hMatch) { const h = parseInt(hMatch[1]); byHour[h] = (byHour[h] || 0) + 1; }
+    // Critical = customer-facing issues
+    if (r.incidentType?.includes("Not") || r.incidentType?.includes("Ignored") || r.incidentType?.includes("Waiting") || r.incidentType?.includes("Unmanned"))
+      criticalCount++;
+  });
+
+  const storesSorted = Object.entries(byStore).sort((a, b) => b[1] - a[1]);
+  const typesSorted = Object.entries(byType).sort((a, b) => b[1] - a[1]);
+  const maxStoreCount = storesSorted[0]?.[1] || 1;
+  const maxTypeCount = typesSorted[0]?.[1] || 1;
+
+  // Worst store
+  const worstStore = storesSorted[0] || ["—", 0];
+  // Top issue
+  const topIssue = typesSorted[0] || ["—", 0];
+  // Peak hour
+  const peakHour = Object.entries(byHour).sort((a, b) => b[1] - a[1])[0];
+  const peakHourStr = peakHour ? (peakHour[0] > 12 ? (peakHour[0]-12)+' PM' : peakHour[0]+' AM') : "—";
+  // Critical %
+  const critPct = records.length ? Math.round((criticalCount / records.length) * 100) : 0;
+  // Stores with zero issues
+  const cleanStores = STORES.filter(s => !byStore[s]);
+
+  const sRows = storesSorted.map(([s, c]) => `<tr><td>${s}</td><td style="text-align:center;font-weight:700">${c}</td></tr>`).join("");
+  const tRows = typesSorted.map(([t, c]) => `<tr><td>${t}</td><td style="text-align:center;font-weight:700">${c}</td></tr>`).join("");
+
+  // Store bar chart
+  const storeBars = storesSorted.map(([s, c]) => {
+    const pct = Math.round((c / maxStoreCount) * 100);
+    const color = pct > 70 ? '#e74c3c' : pct > 40 ? '#f39c12' : '#2ecc71';
+    return `<div style="margin-bottom:6px"><div style="display:flex;align-items:center;gap:8px"><span style="width:140px;font-size:10px;text-align:right;flex-shrink:0">${s}</span><div style="flex:1;background:#eee;border-radius:4px;height:18px;overflow:hidden"><div style="width:${pct}%;background:${color};height:100%;border-radius:4px;display:flex;align-items:center;padding-left:6px"><span style="font-size:9px;font-weight:700;color:#fff">${c}</span></div></div></div></div>`;
+  }).join("");
+
+  // Type bar chart
+  const typeBars = typesSorted.slice(0, 6).map(([t, c]) => {
+    const pct = Math.round((c / maxTypeCount) * 100);
+    const color = t.includes("Not") || t.includes("Ignored") || t.includes("Unmanned") || t.includes("Waiting") ? '#e74c3c' : t.includes("Good") ? '#2ecc71' : '#f39c12';
+    return `<div style="margin-bottom:6px"><div style="display:flex;align-items:center;gap:8px"><span style="width:190px;font-size:10px;text-align:right;flex-shrink:0">${t}</span><div style="flex:1;background:#eee;border-radius:4px;height:18px;overflow:hidden"><div style="width:${pct}%;background:${color};height:100%;border-radius:4px;display:flex;align-items:center;padding-left:6px"><span style="font-size:9px;font-weight:700;color:#fff">${c}</span></div></div></div></div>`;
+  }).join("");
+
+  const w = window.open("", "_blank");
+  if (!w) { alert("Allow popups"); return; }
+
+  w.document.write(`<!DOCTYPE html><html><head><title>Store Monitoring Report</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Arial,sans-serif;padding:28px;color:#1a1a1a;font-size:12px}
+h1{font-size:20px;margin-bottom:2px;color:#1a1a2e}
+h2{font-size:13px;margin:18px 0 6px;color:#1a1a2e;border-bottom:2px solid #1a1a2e;padding-bottom:3px}
+.sub{color:#666;font-size:11px;margin-bottom:14px}
+table{width:100%;border-collapse:collapse;margin-top:4px;margin-bottom:10px}
+th{background:#1a1a2e;color:#fff;padding:6px;text-align:left;font-weight:600;font-size:10px}
+td{padding:6px;border-bottom:1px solid #ddd;vertical-align:top;font-size:10px}
+tr:nth-child(even) td{background:#f5f5fa}
+.badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:700}
+.b-r{background:#ffe0e0;color:#c0392b}.b-y{background:#ffeaa7;color:#6c5b00}.b-g{background:#d5f5e3;color:#1e8449}
+.footer{margin-top:20px;font-size:9px;color:#999;text-align:center;border-top:1px solid #ddd;padding-top:6px}
+.sg{display:flex;gap:16px;margin-bottom:4px}.sg table{width:auto;min-width:180px}
+img.ss{max-width:110px;max-height:70px;border-radius:4px;border:1px solid #ddd;object-fit:cover}
+.dash{page-break-before:always;padding-top:10px}
+.kpi-grid{display:flex;gap:12px;margin:14px 0;flex-wrap:wrap}
+.kpi{flex:1;min-width:130px;border:1px solid #ddd;border-radius:8px;padding:14px;text-align:center}
+.kpi .num{font-size:28px;font-weight:800;line-height:1}
+.kpi .lbl{font-size:10px;color:#666;margin-top:4px;text-transform:uppercase;letter-spacing:0.05em}
+.kpi.red .num{color:#e74c3c}.kpi.yellow .num{color:#f39c12}.kpi.green .num{color:#2ecc71}.kpi.blue .num{color:#2980b9}
+.insight-box{background:#f8f9fa;border-left:4px solid #1a1a2e;padding:10px 14px;margin:8px 0;border-radius:0 6px 6px 0}
+.insight-box .ititle{font-weight:700;font-size:11px;margin-bottom:2px}
+.insight-box .idesc{font-size:10px;color:#444;line-height:1.5}
+.dash-btn{display:inline-block;margin-top:16px;padding:10px 28px;background:#1a1a2e;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none}
+.dash-btn:hover{background:#2a2a4e}
+.no-print{display:block}
+@media print{
+  body{padding:14px}
+  th,.kpi,.insight-box{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .no-print{display:none!important}
+}
+</style></head><body>
+
+<!-- PAGE 1: REPORT -->
+<h1>NishWatch — Store Monitoring Report</h1>
+<p class="sub">Period: ${ff || "All dates"} → ${fto || "Present"} | Observations: ${records.length} | Generated: ${new Date().toLocaleString("en-IN")}</p>
+<h2>Summary</h2>
+<div class="sg">
+<div><strong style="font-size:10px;color:#666">By Store</strong><table>${sRows}</table></div>
+<div><strong style="font-size:10px;color:#666">By Type</strong><table>${tRows}</table></div>
+</div>
+<h2>Detailed Log</h2>
+<table><thead><tr><th>#</th><th>Date</th><th>Time</th><th>Store</th><th>Type</th><th>Remarks</th><th>Screenshot</th><th>By</th></tr></thead>
+<tbody>${records.map((r, i) => {
+    const bc = r.incidentType?.includes("Good") ? "b-g" : (r.incidentType?.includes("Not") || r.incidentType?.includes("Ignored") || r.incidentType?.includes("Unmanned")) ? "b-r" : "b-y";
+    const imgSrc = driveImgUrl(r.imageUrl);
+    return `<tr><td>${i+1}</td><td>${r.date}</td><td>${r.time}</td><td style="white-space:nowrap">${r.store}</td>
+<td><span class="badge ${bc}">${r.incidentType}</span></td><td>${r.remarks}</td>
+<td>${imgSrc ? `<img class="ss" src="${imgSrc}" onerror="if(!this.tried){this.tried=true;this.src=this.src.replace('lh3.googleusercontent.com/d/','drive.google.com/thumbnail?id=').replace('=w200','&sz=w200')}else{this.outerHTML='<a href=\\'${r.imageUrl}\\' target=\\'_blank\\' style=\\'color:#0066cc;font-size:9px\\'>View ↗</a>'}">` : "—"}</td>
+<td>${r.loggedBy || "—"}</td></tr>`;
+  }).join("")}</tbody></table>
+
+<!-- DASHBOARD BUTTON -->
+<div style="text-align:center;margin:24px 0" class="no-print">
+  <button class="dash-btn" onclick="document.getElementById('dashboard').style.display='block';this.style.display='none';window.scrollTo(0,document.body.scrollHeight)">📊 Show Visual Dashboard</button>
+</div>
+
+<!-- PAGE 2: DASHBOARD (hidden until button click) -->
+<div class="dash" id="dashboard" style="display:none">
+<h1>📊 Visual Dashboard</h1>
+<p class="sub">Auto-generated insights from ${records.length} observations | ${ff || "All dates"} → ${fto || "Present"}</p>
+
+<!-- KPIs -->
+<div class="kpi-grid">
+  <div class="kpi red"><div class="num">${records.length}</div><div class="lbl">Total Observations</div></div>
+  <div class="kpi ${critPct > 50 ? 'red' : critPct > 25 ? 'yellow' : 'green'}"><div class="num">${critPct}%</div><div class="lbl">Critical Issues</div></div>
+  <div class="kpi yellow"><div class="num">${storesSorted.length}</div><div class="lbl">Stores Flagged</div></div>
+  <div class="kpi blue"><div class="num">${typesSorted.length}</div><div class="lbl">Issue Categories</div></div>
+  <div class="kpi green"><div class="num">${cleanStores.length}</div><div class="lbl">Clean Stores</div></div>
+</div>
+
+<!-- Charts -->
+<h2>Issues by Store</h2>
+<div style="padding:10px 0">${storeBars}</div>
+
+<h2>Top Issue Types</h2>
+<div style="padding:10px 0">${typeBars}</div>
+
+<!-- 5 KEY INSIGHTS -->
+<h2>Key Insights & Actions</h2>
+
+<div class="insight-box" style="border-left-color:#e74c3c">
+  <div class="ititle">🔴 Worst Performing Store: ${worstStore[0]}</div>
+  <div class="idesc">${worstStore[0]} has the highest number of observations (${worstStore[1]}). Immediate area manager visit and staff re-training recommended. ${worstStore[1] > 3 ? 'This store needs urgent attention — pattern suggests systemic management issue.' : 'Monitor closely over next 48 hours.'}</div>
+</div>
+
+<div class="insight-box" style="border-left-color:#f39c12">
+  <div class="ititle">⚠️ #1 Issue: ${topIssue[0]}</div>
+  <div class="idesc">"${topIssue[0]}" was flagged ${topIssue[1]} time${topIssue[1]>1?'s':''} (${Math.round((topIssue[1]/records.length)*100)}% of all observations). This is a company-wide training gap — not isolated to one store. Recommend adding this to daily briefing checklist across all locations.</div>
+</div>
+
+<div class="insight-box" style="border-left-color:#2980b9">
+  <div class="ititle">🕐 Peak Problem Time: ${peakHourStr}</div>
+  <div class="idesc">Most issues were observed around ${peakHourStr}. Consider increasing supervisor presence during this window. ${peakHour && parseInt(peakHour[0]) < 12 ? 'Morning issues suggest opening-shift discipline problems.' : 'Afternoon/evening issues suggest fatigue or shift-change gaps.'}</div>
+</div>
+
+<div class="insight-box" style="border-left-color:#e74c3c">
+  <div class="ititle">🚨 Customer Impact Score: ${critPct}% Critical</div>
+  <div class="idesc">${critPct}% of all observations directly affect customer experience (not attending, ignoring, long waits). ${critPct > 50 ? 'This is alarming — more than half of flagged issues are customer-facing. Revenue is at risk.' : critPct > 25 ? 'Moderate concern — 1 in 4 issues hits the customer directly.' : 'Relatively low customer-facing issues, but stay vigilant.'} Target: bring this below 20%.</div>
+</div>
+
+<div class="insight-box" style="border-left-color:#2ecc71">
+  <div class="ititle">✅ Clean Stores: ${cleanStores.length > 0 ? cleanStores.slice(0,3).join(', ') : 'None — all flagged'}</div>
+  <div class="idesc">${cleanStores.length > 0 ? cleanStores.length + ' store' + (cleanStores.length>1?'s':'') + ' had zero observations this period. Recognize and reward these teams — use them as benchmarks for underperformers.' : 'Every store was flagged at least once. This indicates a company-wide issue that needs leadership attention, not just store-level action.'}</div>
+</div>
+
+</div>
+
+<div class="footer">NishWatch — Store Monitoring System — Internal & Confidential — Do not distribute</div>
+</body></html>`);
+  w.document.close();
+  setTimeout(() => w.print(), 800);
+}
+
+// ============================================
+// TOAST
+// ============================================
+function showToast(msg, type = "success") {
+  const el = document.getElementById("toast");
+  el.className = "toast " + type;
+  el.textContent = msg;
+  el.classList.remove("hidden");
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.add("hidden"), 3500);
+}
+
+// ============================================
+// START
+// ============================================
+init();
+</script>
+<!-- INSTALL BANNER -->
+<div id="installBanner" class="install-banner hidden">
+  <div class="ib-text">
+    <div class="ib-title">📲 Install NishWatch</div>
+    <div class="ib-sub">Add to home screen for quick access</div>
+  </div>
+  <button class="ib-btn" id="installBtn">Install</button>
+  <button class="ib-close" onclick="document.getElementById('installBanner').classList.add('hidden')">&times;</button>
+</div>
+
+<script>
+// ============================================
+//  SERVICE WORKER + PWA INSTALL
+// ============================================
+let deferredPrompt;
+
+// Register service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(reg => console.log('SW registered'))
+    .catch(err => console.log('SW failed:', err));
+}
+
+// Install prompt
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').classList.remove('hidden');
+});
+
+document.getElementById('installBtn').addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const result = await deferredPrompt.userChoice;
+  if (result.outcome === 'accepted') {
+    showToast('NishWatch installed! 🎉');
+  }
+  deferredPrompt = null;
+  document.getElementById('installBanner').classList.add('hidden');
+});
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBanner').classList.add('hidden');
+  showToast('NishWatch installed! 🎉');
+});
+</script>
+
+</body>
+</html>
