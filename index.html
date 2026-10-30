@@ -378,7 +378,7 @@
 // ============================================
 //  ⚙️ CONFIGURATION — SET YOUR URL HERE
 // ============================================
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbziijdxOVRJWVfKfQejWPcr_h7BeU6rViS_Ixu_rHv2wn--jaJaJ48UyzfglN4E1Wjo/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwoX8AhtShHaYdF6fsHvxx53sDwRm8j9eUFpBHsGvwMuh3Pee60XhDvSRYCs2-HlOAg/exec";
 // Example: const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx.../exec";
 // ============================================
 
@@ -525,9 +525,9 @@ async function handleSubmit() {
   btn.textContent = "⏳ Saving...";
 
   try {
-    await fetch(SCRIPT_URL, {
-      method: "POST", mode: "no-cors",
-      headers: { "Content-Type": "text/plain" },
+    const res = await fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify({
         action: "submit",
         store, incidentType: selectedType,
@@ -535,6 +535,8 @@ async function handleSubmit() {
         image: imageData || ""
       })
     });
+    const result = await res.json();
+    if (!result.success) throw new Error(result.error || "Server rejected the data");
 
     // Show success overlay
     document.getElementById("successOverlay").classList.remove("hidden");
